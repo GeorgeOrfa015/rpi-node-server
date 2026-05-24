@@ -34,7 +34,7 @@ app.listen(PORT, () => {
 
 async function requestDataFromServer() {
     // https://irakleio.buscard.gr/card/RemainingDays/CB212600100014332
-    const response = await fetch("https://irakleio.buscard.gr/en/card/RemainingDays/CB212600100014332");
+    const response = await fetch("https://irakleio.buscard.gr/card/RemainingDays/CB212600100014332");
     if (!response.ok) {
         console.error('Request failed:', response.status, response.statusText);
         return false
