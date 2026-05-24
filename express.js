@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 app.get('/history', async (req, res) => {
     try {
         const n = parseInt(req.query.n) || 1;
-        const content = await fs.readFile('history.txt', 'utf8');
+        const content = await fs.readFile('buscardhistory.txt', 'utf8');
         const lines = content.trim().split('\n').slice(-n);
         res.json({ lines });
     } catch (error) {
@@ -49,7 +49,7 @@ async function requestDataFromServer() {
 
 async function readLastRoute() {
     try {
-        const data = await fs.readFile('history.txt', 'utf8');
+        const data = await fs.readFile('buscardhistory.txt', 'utf8');
         const lines = data.trim().split('\n');
         return lines[lines.length - 1];
     } catch (err) {
@@ -57,8 +57,8 @@ async function readLastRoute() {
     }
 }
 
-function write(text){
-    fs.writeFile('history.txt', text, {flag: "a+"}, err => {
+function write(text, file){
+    fs.writeFile(file, text, {flag: "a+"}, err => {
         if (err) {
             return err;
         }
@@ -93,21 +93,21 @@ async function checkDiff(){
         console.log(localRoute)
 
         if (localRoute != remoteRoute) {
-            write(remoteRoute+"\n")
-            notify(remoteRoute)
+            write(remoteRoute+"\n", 'buscardhistory.txt')
+            notify(remoteRoute, 'Bus Card Validation', `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(remoteRoute)}`, "Bus")
         }
 
         setTimeout(checkDiff, 5*60*1000)
     })
 }
 checkDiff()
-async function notify(text) {
-    const response = await fetch('https://ntfy.sh/GeorgeOrfa015-Test', {
+async function notify(text, title, click, topic) {
+    const response = await fetch('https://ntfy.sh/GeorgeOrfa015-'+topic, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'Title': 'Bus Card Validation',
-            'Click': `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(text)}`
+            'Title': title,
+            'Click': click
         },
         body: text
     });
