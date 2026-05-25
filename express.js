@@ -94,22 +94,25 @@ async function checkDiff(){
 
         if (localRoute != remoteRoute) {
             write(remoteRoute+"\n", 'buscardhistory.txt')
-            notify(remoteRoute, 'Bus Card Validation', `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(remoteRoute)}`, "Bus")
+            notify(remoteRoute, 'Bus Card Validation', `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(remoteRoute)}`, "Bus", 3)
         }
 
         setTimeout(checkDiff, 5*60*1000)
     })
 }
 checkDiff()
-async function notify(text, title, click, topic) {
+async function notify(text, title, click, topic, priority) {
     const response = await fetch('https://ntfy.sh/GeorgeOrfa015-'+topic, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
             'Title': title,
-            'Click': click
+            'Click': click,
+            'Priority': priority
         },
         body: text
     });
     return await response.json();
 }
+
+notify("Server Started", "NodeJS Server Status", "", "Test", 1)
