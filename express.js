@@ -102,17 +102,22 @@ async function checkDiff(){
 }
 checkDiff()
 async function notify(text, title, click, topic, priority) {
-    const response = await fetch('https://ntfy.sh/GeorgeOrfa015-'+topic, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Title': title,
-            'Click': click,
-            'Priority': priority
-        },
-        body: text
-    });
-    return await response.json();
+    try {
+        const response = await fetch('https://ntfy.sh/GeorgeOrfa015-'+topic, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Title': title,
+                'Click': click,
+                'Priority': priority
+            },
+            body: text
+        });
+        return await response.json();
+    } catch (err) {
+        console.error(`[notify] Failed to send "${title}":`, err.message);
+        return null;
+    }
 }
 
 notify("Server Started", "NodeJS Server Status", "", "Test", 1)
