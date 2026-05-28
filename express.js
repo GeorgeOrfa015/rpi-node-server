@@ -70,17 +70,17 @@ async function checkDiff(){
         console.log(data)
         let productIndex = 0
         if (data.product0 != null) {
-            if (data.product0.status != 15) {
+            if (data.product0.status == 15) {
                 productIndex = 0
             }
         }
         if (data.product1 != null) {
-            if (data.product1.status != 15) {
+            if (data.product1.status == 15) {
                 productIndex = 1
             }
         }
         if (data.product2 != null) {
-            if (data.product2.status != 15) {
+            if (data.product2.status == 15) {
                 productIndex = 2
             }
         }
