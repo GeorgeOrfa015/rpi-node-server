@@ -15,10 +15,18 @@ app.get('/', (req, res) => {
 
 app.get('/history', async (req, res) => {
     try {
-        const n = parseInt(req.query.n) || 1;
+        const n = req.query.n || 1;
         const content = await fs.readFile('buscardhistory.txt', 'utf8');
-        const lines = content.trim().split('\n').slice(-n);
-        res.json({ lines });
+        let data;
+        let length;
+        if (n == "all") {
+            data = content.trim().split('\n')
+            length = content.trim().split('\n').length
+        }else{
+            data = content.trim().split('\n').slice(-parseInt(n));
+            length = content.trim().split('\n').slice(-parseInt(n)).length
+        }
+        res.json({ data, length });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
