@@ -5,15 +5,23 @@ import cors from "cors";
 const app = express();
 const PORT = 8080;
 
+const startDate = new Date().getTime();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors())
 
+// Test Endpoint
 app.get('/', (req, res) => {
     res.json({ message: 'Hello, World!' });
 });
 
+// Status Endpoint
+app.get('/status', (req, res)=> {
+    res.json({ online: true, startTS: startDate, uptime: new Date().getTime() - startDate})
+});
+
+// Bus History Entries Endpoint
 app.get('/history', async (req, res) => {
     try {
         const n = req.query.n || 1;
