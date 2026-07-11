@@ -2,7 +2,9 @@
   "dependencies": {
     "axiom": "^0.52.2",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "sharp": "^0.35.3"
   },
   "type": "module"
 }
