@@ -5,6 +5,7 @@ import https from 'https';
 import cors from "cors";
 import multer from 'multer';
 import sharp from 'sharp';
+import { WebSocketServer } from 'ws';
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -134,16 +135,25 @@ app.post('/tools/photo/film', upload.single('image'), async (req, res) => {
 
 
 // Server Initialization
-const httpsOptions = {
-    key: fsSync.readFileSync('/etc/letsencrypt/live/georgeorfa015.duckdns.org/privkey.pem'),
-    cert: fsSync.readFileSync('/etc/letsencrypt/live/georgeorfa015.duckdns.org/fullchain.pem')
-};
+let server;
 
-https.createServer(httpsOptions, app).listen(PORT, () => {
-    console.log(`HTTPS server running at https://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV === 'production') {
+    const httpsOptions = {
+        key: fsSync.readFileSync('/etc/letsencrypt/live/georgeorfa015.duckdns.org/privkey.pem'),
+        cert: fsSync.readFileSync('/etc/letsencrypt/live/georgeorfa015.duckdns.org/fullchain.pem')
+    };
 
+    server = https.createServer(httpsOptions, app);
+    server.listen(PORT, () => {
+        console.log(`HTTPS server running at https://localhost:${PORT}`);
+    });
+} else {
+    server = app.listen(PORT, () => {
+        console.log(`HTTP server running at http://localhost:${PORT}`);
+    });
+}
 
+const wss = new WebSocketServer({ server });
 
 //! ↑ SERVER SETUP - ENDPOINTS ↑ !//
 //>---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------<//
@@ -246,6 +256,19 @@ function writeTxt(text, file){
     });
 }
 
+
+
+//! WEBSOCKETS !//
+wss.on('connection', (ws) => {
+    console.log('WS client connected');
+
+    ws.on('message', (data) => {
+        console.log('Got:', data.toString());
+    });
+
+    ws.on('close', () => console.log('WS client disconnected'));
+    ws.on('error', (err) => console.error('WS error:', err));
+});
 
 
 
