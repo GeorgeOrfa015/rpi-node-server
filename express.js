@@ -1,5 +1,7 @@
 import express from 'express';
 import fs from 'fs/promises';
+import fsSync from 'fs';
+import https from 'https';
 import cors from "cors";
 import multer from 'multer';
 import sharp from 'sharp';
@@ -132,8 +134,13 @@ app.post('/tools/photo/film', upload.single('image'), async (req, res) => {
 
 
 // Server Initialization
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+const httpsOptions = {
+    key: fsSync.readFileSync('/etc/letsencrypt/live/georgeorfa015.duckdns.org/privkey.pem'),
+    cert: fsSync.readFileSync('/etc/letsencrypt/live/georgeorfa015.duckdns.org/fullchain.pem')
+};
+
+https.createServer(httpsOptions, app).listen(PORT, () => {
+    console.log(`HTTPS server running at https://localhost:${PORT}`);
 });
 
 
@@ -240,7 +247,6 @@ function writeTxt(text, file){
 }
 
 
-//* 
 
 
 //! FUNCTION INITIALIZATION !//
