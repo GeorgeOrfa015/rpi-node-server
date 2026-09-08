@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "axiom": "^0.52.2",
+    "axiom": "^0.1.6",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "multer": "^2.2.0",

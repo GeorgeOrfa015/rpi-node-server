@@ -6,6 +6,9 @@ import cors from "cors";
 import multer from 'multer';
 import sharp from 'sharp';
 import { WebSocketServer } from 'ws';
+import { randomUUID } from 'crypto';
+import { parse } from 'url';
+
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -259,14 +262,80 @@ function writeTxt(text, file){
 
 
 //! WEBSOCKETS !//
-wss.on('connection', (ws) => {
+const clients = new Map();
+
+wss.on('connection', (ws, req) => {
+    ws.id = randomUUID();
+    const { searchParams } = new URL(req.url, 'wss://base')
+    const clientInfo = {
+        "name": ws.id,
+        "join_ts": Date.now(),
+        "mode": searchParams.get('mode'),
+        "username": searchParams.get('username')
+    }
+    clients.set(ws, clientInfo);
+    if (clientInfo.mode == "host") {
+        let roomcode = randomUUID().slice(0, 4);
+        console.log(roomcode)
+        clientInfo.roomcode = roomcode
+        ws.send("roomcode: "+roomcode)
+    }
+
+    console.log(clients)
     console.log('WS client connected');
 
+    let messageCount = 0
     ws.on('message', (data) => {
         console.log('Got:', data.toString());
+        messageCount += 1
+
+        if (clientInfo.mode == "test") {
+            if (messageCount == 1) {
+                clientInfo.roomcode = data.toString()
+                console.log("")
+                console.log("")
+                for (const [clientWs, info] of clients) {
+                    console.log(info)
+                    if (info.mode == "host") {
+                        if (info.roomcode == clientInfo.roomcode) {
+                            clientWs.send("newClient: "+ws.id);
+                        }
+                    }
+                }
+                console.log("")
+                console.log("")
+            }
+        }
+
     });
 
-    ws.on('close', () => console.log('WS client disconnected'));
+    ws.on('close', () => {
+        console.log(`Client ${ws.id} disconnected`);
+        if (clientInfo.mode = "test") {
+            for (const [clientWs, info] of clients) {
+                console.log(info)
+                if (info.mode == "host") {
+                    if (info.roomcode == clientInfo.roomcode) {
+                        clientWs.send("clientDisconnect: "+ws.id);
+                    }
+                }
+                
+            }
+        }
+        if (clientInfo.mode = "host") {
+            for (const [clientWs, info] of clients) {
+                if (info.mode == "test") {
+                    if (info.roomcode == clientInfo.roomcode) {
+                        clientWs.close();
+                        console.log("CLOSED "+info.username)
+                    }
+                }
+            }
+        }
+
+        clients.delete(ws)
+    });
+
     ws.on('error', (err) => console.error('WS error:', err));
 });
 
