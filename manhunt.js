@@ -39,8 +39,8 @@ export default function createTestModule(wss, clients) {
             res.status(200).json({"newRole": getUser(data.username).role})
             if (gameStarted) {
                 let flag = true
-                for (const [user, data] of clientData) {
-                    if (data.role == "runner") {
+                for (const [user, dataL] of clientData) {
+                    if (dataL.role == "runner") {
                         flag = false
                     }
                 }
@@ -134,6 +134,7 @@ function addUser(username, data = {}) {
 }
 
 function removeUser(username) {
+    console.log(username + " removed")
     return clientData.delete(username); // returns true/false — useful for "did it exist?"
 }
 
@@ -163,7 +164,7 @@ function listUsers() {
 
 
 
-
+let pingTimeout
 
 
 let delayList = [10, 10, 10, 5, 5, 5, 2.5, 2.5, 2.5, 2.5, 1]
@@ -186,12 +187,13 @@ function start() {
 
     gameStarted = true;
     notifyMH(`Hunters: ${huntersTXT}\nRunners: ${runnersTXT}`, "THE GAME HAS STARTED!", "https://georgeorfa015.github.io/indev/manhunt.html", "ALL", 3);
-    setTimeout(timer, delayList[delayIndex]*60*1000);
+    pingTimeout = setTimeout(timer, delayList[delayIndex]*60*1000);
     nextPingTS = new Date().getTime() + delayList[delayIndex]*60*1000
     delayIndex += 1;
 }
 
 let lastPingTS;
+let reminderTimeout;
 function timer() {
     console.log("PING "+delayIndex)
     let allHunters = true;
@@ -203,15 +205,15 @@ function timer() {
     if (allHunters) {
         endGame(true);
     }else{
+        notifyMH("The runners' locations will appear above this message for PING "+delayIndex, "PING "+delayIndex, "", "ALL", 1);
         for (const [user, data] of clientData) {
             if (data.role == "runner") {
-                notifyMH("The runners' locations will appear above this message for PING "+delayIndex, "PING "+delayIndex, "", "ALL", 1);
                 notifyMH("Please send your location via the website.", "PING TIME!","https://georgeorfa015.github.io/indev/manhunt.html", user, 4);
             }
         }
         lastPingTS = new Date().getTime();
-        setTimeout(timer, delayList[delayIndex]*60*1000);
-        // setTimeout(reminder, delayList[delayIndex]*60*1000*(60/100));
+        pingTimeout = setTimeout(timer, delayList[delayIndex]*60*1000);
+        reminderTimeout = setTimeout(reminder, delayList[delayIndex]*60*1000*(60/100));
         nextPingTS = new Date().getTime() + delayList[delayIndex]*60*1000
         delayIndex+=1
         if (delayIndex >= delayList.length-1) {
@@ -221,17 +223,20 @@ function timer() {
 }
 
 function reminder() {
-    let allHunters = true;
-    for (const [user, data] of clientData) {
-        if (data.role == "runner") {
-            allHunters = false;
-        }
-    }
-    if(!allHunters) {
-        for (const [user, data] in clientData) {
+    if (gameStarted) {
+
+        let allHunters = true;
+        for (const [user, data] of clientData) {
             if (data.role == "runner") {
-                if (data.lastPingTS < lastPingTS) {
-                    notifyMH("Please send your location via the website immediately!", "YOU'RE TAKING TOO LONG!","https://georgeorfa015.github.io/indev/manhunt.html", user, 5);
+                allHunters = false;
+            }
+        }
+        if(!allHunters) {
+            for (const [user, data] of clientData) {
+                if (data.role == "runner") {
+                    if (data.lastPingTS < lastPingTS) {
+                        notifyMH("Please send your location via the website immediately!", "YOU'RE TAKING TOO LONG!","https://georgeorfa015.github.io/indev/manhunt.html", user, 5);
+                    }
                 }
             }
         }
@@ -261,6 +266,9 @@ async function notifyMH(text, title, click, topic, priority) {
 }
 
 function endGame(notify) {
+    console.log("GAME ENDED")
+    clearTimeout(pingTimeout);
+    clearTimeout(reminderTimeout);
     if (notify) notifyMH("Thanks for playing!", "THE GAME HAS ENDED.", "", "ALL", 3)
     clientData.clear();
     gameStarted = false;
