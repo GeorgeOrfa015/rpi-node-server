@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'crypto';
 import { parse } from 'url';
-
+import createTestModule from './manhunt.js';
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -16,8 +16,7 @@ const PORT = 8080;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors())
-
+app.use(cors());
 
 
 // // Test Endpoint
@@ -344,3 +343,7 @@ wss.on('connection', (ws, req) => {
 //! FUNCTION INITIALIZATION !//
 notify("Server Started", "NodeJS Server Status", "", "Test", 1)
 busCardCheckDiff()
+
+
+const testRouter = createTestModule(wss, clients);
+app.use(testRouter);
