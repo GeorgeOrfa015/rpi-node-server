@@ -60,6 +60,16 @@ export default function createTestModule(wss, clients) {
         }
     })
 
+    router.get('/manhunt/remove/:username', (req, res) => {
+        const { username } = req.params;
+        if (hasUser(username)) {
+            removeUser(username)
+            res.json({removed: true, reason: ""})
+        }else{
+            res.json({removed: false, reason: "User not found."})
+        }
+    })
+
 
     router.get('/manhunt/start', (req, res)=>{
         start();
@@ -97,6 +107,7 @@ export default function createTestModule(wss, clients) {
 
     router.get('/manhunt/reset', (req, res) => {
         endGame(false);
+        res.json({"reset": true});
     })
 
     //window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${long}`).focus();
