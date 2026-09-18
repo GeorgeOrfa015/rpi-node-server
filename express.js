@@ -181,7 +181,7 @@ async function requestDataFromBusAPI() {
 //* Reads bus card file and checks differences to log changes
 async function busCardCheckDiff(){
     requestDataFromBusAPI().then(async (data) => {
-        let productIndex = 0
+        let productIndex = -1;
         if (data.product0 != null) {
             if (data.product0.status == 15) {
                 productIndex = 0
@@ -197,16 +197,19 @@ async function busCardCheckDiff(){
                 productIndex = 2
             }
         }
+        if (productIndex == -1) {
+            console.log("No Product Activated")
+        }else{
+            
+            let remoteRoute = data["product"+productIndex].usageTime +" | "+ data["product"+productIndex].usageRoute
 
-        let remoteRoute = data["product"+productIndex].usageTime +" | "+ data["product"+productIndex].usageRoute
+            let localRoute = await readTxt("buscardhistory.txt")
 
-        let localRoute = await readTxt("buscardhistory.txt")
-
-        if (localRoute != remoteRoute) {
-            writeTxt(remoteRoute+"\n", 'buscardhistory.txt')
-            notify(remoteRoute, 'Bus Card Validation', `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(remoteRoute)}`, "Bus", 3)
+            if (localRoute != remoteRoute) {
+                writeTxt(remoteRoute+"\n", 'buscardhistory.txt')
+                notify(remoteRoute, 'Bus Card Validation', `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(remoteRoute)}`, "Bus", 3)
+            }
         }
-
         setTimeout(busCardCheckDiff, 5*60*1000)
     })
 }
