@@ -136,7 +136,8 @@ app.post('/tools/photo/film', upload.single('image'), async (req, res) => {
 });
 
 app.get("/api/unsplash-image", async (req, res) => {
-    const response = await fetch(`https://api.unsplash.com/photos/random?query=code&client_id=${process.env.UNSPLASH_KEY}`);
+    const topic = req.query.topic || "nature";
+    const response = await fetch(`https://api.unsplash.com/photos/random?query=${encodeURI(topic)}&client_id=${process.env.UNSPLASH_KEY}`);
     const data = await response.json();
     res.json(data);
 });
