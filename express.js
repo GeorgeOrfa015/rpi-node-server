@@ -9,6 +9,8 @@ import { WebSocketServer } from 'ws';
 import { randomUUID } from 'crypto';
 import { parse } from 'url';
 import createTestModule from './manhunt.js';
+import 'dotenv/config';
+
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -133,7 +135,11 @@ app.post('/tools/photo/film', upload.single('image'), async (req, res) => {
     }
 });
 
-
+app.get("/api/unsplash-image", async (req, res) => {
+    const response = await fetch(`https://api.unsplash.com/photos/random?query=code&client_id=${process.env.UNSPLASH_KEY}`);
+    const data = await response.json();
+    res.json({ url: data.urls.full });
+});
 
 
 // Server Initialization
