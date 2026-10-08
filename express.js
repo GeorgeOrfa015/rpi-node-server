@@ -9,7 +9,9 @@ import { WebSocketServer } from 'ws';
 import { randomUUID } from 'crypto';
 import { parse } from 'url';
 import createTestModule from './manhunt.js';
+import mailRouter from './mail.js';
 import 'dotenv/config';
+
 
 
 const app = express();
@@ -356,4 +358,5 @@ busCardCheckDiff()
 
 
 const testRouter = createTestModule(wss, clients);
+app.use('/mail', mailRouter);
 app.use(testRouter);
