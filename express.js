@@ -191,21 +191,38 @@ async function requestDataFromBusAPI() {
 async function busCardCheckDiff(){
     requestDataFromBusAPI().then(async (data) => {
         let productIndex = -1;
-        if (data.product0 != null) {
-            if (data.product0.status == 15) {
-                productIndex = 0
+        let products = [data.product0, data.product1, data.product2]
+
+
+        let isTimed = false;
+        let timedIndex = -1;
+        let i = 0;
+        products.forEach(product => {
+            if (product) {
+                if (product.productType == 1) {
+                    if (product.status == 15) {
+                        isTimed = true;
+                        timedIndex = i
+                    }
+                }
             }
+            i++;
+        })
+
+        if (isTimed) {
+            productIndex = timedIndex
+        }else{
+            i = 0
+            products.forEach(product => {
+                if (product) {
+                    if (product.status == 15) {
+                        productIndex = i
+                    }
+                }
+                i++;
+            })
         }
-        if (data.product1 != null) {
-            if (data.product1.status == 15) {
-                productIndex = 1
-            }
-        }
-        if (data.product2 != null) {
-            if (data.product2.status == 15) {
-                productIndex = 2
-            }
-        }
+
         if (productIndex == -1) {
             console.log("No Product Activated")
         }else{
