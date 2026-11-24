@@ -236,7 +236,7 @@ async function busCardCheckDiff(){
                 notify(remoteRoute, 'Bus Card Validation', `shortcuts://run-shortcut?name=${encodeURIComponent("Save Bus Route")}&input=text&text=${encodeURIComponent(remoteRoute)}`, "Bus", 3)
             }
         }
-        setTimeout(busCardCheckDiff, 5*60*1000)
+        setTimeout(busCardCheckDiff, 2.5*60*1000)
     })
 }
 
